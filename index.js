@@ -2,9 +2,16 @@ require('dotenv').config();
 const express = require('express')
 const mysql = require('mysql2')
 const app = express();
+const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 const port = 3000
 app.use(express.json());
+
+const limiter = rateLimit({
+    windowMs: 1 * 60 * 1000,
+    max: 100,
+    message: 'Too many requests from this IP, Try again Later.'
+})
 
 const db = mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',
@@ -21,6 +28,8 @@ db.connect((err)=>{
     }
     console.log('Connected to Database!')
 })
+
+app.use(limiter);
 
 //==========
 // CRUD
